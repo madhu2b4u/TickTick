@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "TickTick"
 include(":app")
 include(":core")
+include(":features:todo")
