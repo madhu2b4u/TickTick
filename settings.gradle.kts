@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "TickTick"
 include(":app")
+include(":core")
