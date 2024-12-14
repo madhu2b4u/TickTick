@@ -25,13 +25,24 @@ class TodoViewModel @Inject constructor(
     private val _todos = MutableStateFlow<List<TodoEntity>>(emptyList())
     val todos: StateFlow<List<TodoEntity>> = _todos.asStateFlow()
 
+    private val _noResultsMessage = MutableStateFlow<String?>(null)
+    val noResultsMessage: StateFlow<String?> = _noResultsMessage.asStateFlow()
+
     val filteredTodos: StateFlow<List<TodoEntity>> = combine(
         _todos,
         _searchQuery
+
     ) { todos, query ->
-        todos.filter {
-            it.title.contains(query, ignoreCase = true)
+        val filtered = todos.filter {
+            it.task.contains(query, ignoreCase = true)
         }
+        if (filtered.isEmpty() && query.isNotEmpty()) {
+            _noResultsMessage.value = "No Results"
+        } else {
+            _noResultsMessage.value = null
+        }
+        filtered
+
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

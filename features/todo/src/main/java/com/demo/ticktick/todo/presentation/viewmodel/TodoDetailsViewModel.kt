@@ -27,7 +27,7 @@ class TodoDetailsViewModel @Inject constructor(
 
     fun addTodo(task: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            if (task.equals("error", ignoreCase = true)){
+            if (task.equals("error", ignoreCase = true)) {
                 _uiState.value = TodoDetailsUiState.Error
                 _toastEvent.emit(Pair("Failed to add TODO", ToastType.ERROR))
                 return@launch
@@ -37,7 +37,7 @@ class TodoDetailsViewModel @Inject constructor(
                 delay(3000)
                 createTodoUseCase.createTodo(task = task)
                 _uiState.value = TodoDetailsUiState.Success
-                _toastEvent.emit(Pair("Task added successfully!", ToastType.SUCCESS))
+                _toastEvent.emit(Pair("TODO added successfully!", ToastType.SUCCESS))
             } catch (e: Exception) {
                 e.printStackTrace()
                 _uiState.value = TodoDetailsUiState.Error

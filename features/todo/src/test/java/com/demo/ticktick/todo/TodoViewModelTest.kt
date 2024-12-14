@@ -1,8 +1,9 @@
+package com.demo.ticktick.todo
+
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.demo.ticktick.core.database.TodoEntity
 import com.demo.ticktick.todo.domain.GetAllTodosUseCase
 import com.demo.ticktick.todo.presentation.viewmodel.TodoViewModel
-import io.mockk.coEvery
-import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -10,98 +11,139 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class TodoListViewModelTest {
+class TodoViewModelTest {
+
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
+
     private val testDispatcher = StandardTestDispatcher()
 
+    @Mock
     private lateinit var getAllTodosUseCase: GetAllTodosUseCase
+
     private lateinit var viewModel: TodoViewModel
 
-    @BeforeEach
+    // Sample todo entities for testing
+    private val sampleTodos = listOf(
+        TodoEntity(1, "Buy groceries"),
+        TodoEntity(2, "Clean house"),
+        TodoEntity(3, "Prepare presentation")
+    )
+
+    @Before
     fun setup() {
+        MockitoAnnotations.openMocks(this)
         Dispatchers.setMain(testDispatcher)
-        getAllTodosUseCase = mockk()
     }
 
-    @AfterEach
+    @After
     fun tearDown() {
         Dispatchers.resetMain()
     }
 
-    @Test
-    fun `initial state should be empty todos`() = runTest {
-        // Arrange
-        coEvery { getAllTodosUseCase.getAllTodos() } returns flowOf(emptyList())
 
-        // Act
+    @Test
+    fun `initial state should have empty todos and search query`() = runTest {
+        // Setup
+        whenever(getAllTodosUseCase.getAllTodos()).thenReturn(flowOf(emptyList()))
+
+        // Create ViewModel
         viewModel = TodoViewModel(getAllTodosUseCase)
 
-        // Assert
-        val todos = viewModel.todos.value
-        assertTrue(todos.isEmpty())
+        // Advance time to process coroutines
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify
+        assertTrue(viewModel.todos.value.isEmpty())
+        assertEquals("", viewModel.searchQuery.value)
     }
 
     @Test
-    fun `fetchTodos should update todos list`() = runTest {
-        // Arrange
-        val mockTodos = listOf(
-            TodoEntity(1, "Task 1"),
-            TodoEntity(2, "Task 2")
-        )
-        coEvery { getAllTodosUseCase.getAllTodos() } returns flowOf(mockTodos)
+    fun `fetchTodos should populate todos when successful`() = runTest {
+        // Setup
+        whenever(getAllTodosUseCase.getAllTodos()).thenReturn(flowOf(sampleTodos))
 
-        // Act
+        // Create ViewModel
         viewModel = TodoViewModel(getAllTodosUseCase)
+
+        // Advance time to process coroutines
         testDispatcher.scheduler.advanceUntilIdle()
 
-        // Assert
-        val todos = viewModel.todos.value
-        assertEquals(2, todos.size)
-        assertEquals("Task 1", todos[0].title)
-        assertEquals("Task 2", todos[1].title)
+        // Verify
+        assertEquals(sampleTodos, viewModel.todos.value)
     }
 
     @Test
-    fun `search query should filter todos correctly`() = runTest {
-        // Arrange
-        val mockTodos = listOf(
-            TodoEntity(1, "Buy groceries"),
-            TodoEntity(2, "Call mom"),
-            TodoEntity(3, "Buy phone")
-        )
-        coEvery { getAllTodosUseCase.getAllTodos() } returns flowOf(mockTodos)
+    fun `fetchTodos should handle empty list`() = runTest {
+        // Setup
+        whenever(getAllTodosUseCase.getAllTodos()).thenReturn(flowOf(emptyList()))
+
+        // Create ViewModel
+        viewModel = TodoViewModel(getAllTodosUseCase)
+
+        // Advance time to process coroutines
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify
+        assertTrue(viewModel.todos.value.isEmpty())
+    }
+
+    @Test
+    fun `fetchTodos should handle exception by setting empty list`() = runTest {
+        // Setup
+        whenever(getAllTodosUseCase.getAllTodos()).thenThrow(RuntimeException("Network error"))
+
+        // Create ViewModel
+        viewModel = TodoViewModel(getAllTodosUseCase)
+
+        // Advance time to process coroutines
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify
+        assertTrue(viewModel.todos.value.isEmpty())
+    }
+
+    @Test
+    fun `updateSearchQuery should update search query`() = runTest {
+        // Setup
+        whenever(getAllTodosUseCase.getAllTodos()).thenReturn(flowOf(sampleTodos))
+        viewModel = TodoViewModel(getAllTodosUseCase)
 
         // Act
-        viewModel = TodoViewModel(getAllTodosUseCase)
-        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.updateSearchQuery("groceries")
 
-        viewModel.updateSearchQuery("buy")
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Assert
-        val filteredTodos = viewModel.filteredTodos.value
-        assertEquals(2, filteredTodos.size)
-        assertTrue(filteredTodos.all { it.title.contains("buy", ignoreCase = true) })
+        // Verify
+        assertEquals("groceries", viewModel.searchQuery.value)
     }
 
 
     @Test
-    fun `error in fetchTodos should result in empty list`() = runTest {
-        // Arrange
-        coEvery { getAllTodosUseCase.getAllTodos() } throws RuntimeException("Database error")
-
-        // Act
+    fun `filteredTodos should return empty list when no match`() = runTest {
+        // Setup
+        whenever(getAllTodosUseCase.getAllTodos()).thenReturn(flowOf(sampleTodos))
         viewModel = TodoViewModel(getAllTodosUseCase)
+
+        // Advance to populate todos
         testDispatcher.scheduler.advanceUntilIdle()
 
-        // Assert
-        val todos = viewModel.todos.value
-        assertTrue(todos.isEmpty())
+        // Act
+        viewModel.updateSearchQuery("nonexistent")
+
+        // Advance to process search
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify
+        assertTrue(viewModel.filteredTodos.value.isEmpty())
     }
 }

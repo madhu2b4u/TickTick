@@ -37,7 +37,7 @@ class TodoRepositoryImplTest {
         val result = todoRepository.createTodo(title)
 
         // Assert
-        assertEquals(title, result.title)
+        assertEquals(title, result.task)
         assertNotNull(result.timestamp)
         coVerify { localDataSource.saveTodo(result) }
     }

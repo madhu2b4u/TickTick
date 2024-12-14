@@ -114,7 +114,7 @@ fun TodoDetailsScreen(navController: NavController) {
                     onClick = {
                         viewModel.addTodo(taskText)
                         keyboardController?.hide()
-                      },
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = taskText.isNotBlank() && uiState !is TodoDetailsUiState.Loading
                 ) {

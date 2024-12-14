@@ -18,7 +18,7 @@ class CreateTodoUseCaseImplTest {
     fun `createTodo should successfully create a todo when task is valid`() = runTest {
         // Arrange
         val task = "Buy groceries"
-        val expectedTodo = TodoEntity(id = 1, title = task)
+        val expectedTodo = TodoEntity(id = 1, task = task)
 
         coEvery { mockRepository.createTodo(task) } returns expectedTodo
 

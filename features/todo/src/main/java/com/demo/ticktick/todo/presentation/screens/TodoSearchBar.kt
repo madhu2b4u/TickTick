@@ -82,7 +82,7 @@ fun TodoSearchBar(
 @Composable
 fun TodoItemSearchResultRow(todo: TodoEntity) {
     Text(
-        text = todo.title,
+        text = todo.task,
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)

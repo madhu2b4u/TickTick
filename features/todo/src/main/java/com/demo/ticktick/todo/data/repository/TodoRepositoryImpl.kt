@@ -13,7 +13,7 @@ class TodoRepositoryImpl @Inject constructor(
 
     override suspend fun createTodo(title: String): TodoEntity {
         val newTodo = TodoEntity(
-            title = title,
+            task = title,
         )
         localDataSource.saveTodo(newTodo)
         return newTodo
