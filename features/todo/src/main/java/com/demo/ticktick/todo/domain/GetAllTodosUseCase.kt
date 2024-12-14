@@ -1,9 +1,8 @@
-package com.demo.ticktick.todo.data.repository
+package com.demo.ticktick.todo.domain
 
 import com.demo.ticktick.core.database.TodoEntity
 import kotlinx.coroutines.flow.Flow
 
-interface TodoRepository {
+interface GetAllTodosUseCase {
     suspend fun getAllTodos(): Flow<List<TodoEntity>>
-    suspend fun createTodo(title: String): TodoEntity
 }

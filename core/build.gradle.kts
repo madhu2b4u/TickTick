@@ -25,8 +25,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
@@ -48,22 +48,8 @@ android {
 
 dependencies {
     kapt(libs.hilt.compiler)
+    kapt("androidx.room:room-compiler:2.5.0")
     implementation(libs.bundles.androidx.core)
-    implementation(libs.bundles.androidx.compose.ui)
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.room)
-
-    // Compose BOM and other dependencies
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-}
-
-configurations.all {
-    resolutionStrategy {
-        // Force the newer annotations version to avoid conflicts
-        force("org.jetbrains:annotations:23.0.0")
-    }
 }

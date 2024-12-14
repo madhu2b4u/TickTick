@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     id("kotlin-kapt")
-    id("kotlin-parcelize")
 }
 
 android {
@@ -31,8 +30,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
         jvmTarget = libs.versions.jvmTarget.get()
@@ -45,14 +44,19 @@ android {
     }
     packaging {
         resources {
-            merges += "META-INF/gradle/incremental.annotation.processors"
+            excludes += "META-INF/LICENSE.md"
+            pickFirsts += "META-INF/LICENSE-notice.md"
             excludes += "META-INF/gradle/incremental.annotation.processors"
         }
     }
 }
 
-dependencies {
+configurations.all {
+    exclude(group = "com.intellij", module = "annotations")
+}
 
+dependencies {
+    implementation(project(":features:todo"))
     kapt(libs.hilt.compiler)
     // Include bundles
     implementation(libs.bundles.androidx.core)
