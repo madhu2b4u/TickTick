@@ -9,4 +9,6 @@
     <string name="todo_list">Todo List</string>
     <string name="enter_todo_task">Enter Todo Task</string>
     <string name="back">Back</string>
+    <string name="ok">OK</string>
+    <string name="notification">Notification</string>
 </resources>

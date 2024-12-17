@@ -5,12 +5,15 @@ import androidx.annotation.NonNull
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import javax.inject.Singleton
 
 @Database(
     entities = [TodoEntity::class],
     version = 2,
     exportSchema = false
 )
+
+@Singleton
 abstract class TodoDatabase : RoomDatabase() {
 
     companion object {

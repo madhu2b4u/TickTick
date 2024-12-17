@@ -9,12 +9,19 @@ import com.demo.ticktick.todo.presentation.screens.TodoDetailsScreen
 const val ROUTE_TODO_SCREEN = "todo_screen"
 const val ROUTE_ADD_TODO_SCREEN = "add_todo_screen"
 
-
 fun NavGraphBuilder.todoNavGraph(navController: NavController) {
     composable(ROUTE_TODO_SCREEN) {
-        TodoListScreen(navController)
+        TodoListScreen(
+            navigateToAddTodo = {
+                navController.navigate(ROUTE_ADD_TODO_SCREEN)
+            }
+        )
     }
     composable(ROUTE_ADD_TODO_SCREEN) {
-        TodoDetailsScreen(navController)
+        TodoDetailsScreen(
+            navigateToTodoScreen = {
+                navController.popBackStack()
+            }
+        )
     }
 }

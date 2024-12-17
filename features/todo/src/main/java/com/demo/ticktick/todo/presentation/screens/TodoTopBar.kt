@@ -43,7 +43,9 @@ fun TodoTopBar(
 
         TodoSearchBar(
             query = searchQuery,
-            onQueryChange = onSearchQueryChange,
+            onQueryChange = {
+                onSearchQueryChange(it)
+            },
             expanded = searchBarExpanded,
             onExpandedChange = onSearchBarExpandedChange,
             todos = todos,

@@ -1,6 +1,5 @@
 package com.demo.ticktick.todo.presentation.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,57 +23,35 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.demo.ticktick.todo.R
-import com.demo.ticktick.todo.data.models.ToastType
 import com.demo.ticktick.todo.data.models.TodoDetailsUiState
-import com.demo.ticktick.todo.presentation.nav.ROUTE_TODO_SCREEN
 import com.demo.ticktick.todo.presentation.viewmodel.TodoDetailsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TodoDetailsScreen(navController: NavController) {
+fun TodoDetailsScreen(navigateToTodoScreen: () -> Unit) {
 
     val viewModel: TodoDetailsViewModel = hiltViewModel()
-
     val uiState by viewModel.uiState.collectAsState()
     var taskText by rememberSaveable { mutableStateOf("") }
-    val toastMessage = remember { mutableStateOf("") }
-    val toastType = remember { mutableStateOf(ToastType.ERROR) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(uiState) {
         when (uiState) {
-            TodoDetailsUiState.Success -> {
-                navController.navigate(ROUTE_TODO_SCREEN) {
-                    popUpTo(ROUTE_TODO_SCREEN) { inclusive = false }
-                }
-            }
-
+            TodoDetailsUiState.Success,
             TodoDetailsUiState.Error -> {
-                navController.navigate(ROUTE_TODO_SCREEN) {
-                    popUpTo(ROUTE_TODO_SCREEN) { inclusive = false }
-                }
+                navigateToTodoScreen()
             }
 
             else -> {}
-        }
-    }
-
-    LaunchedEffect(viewModel.toastEvent) {
-        viewModel.toastEvent.collect { (message, type) ->
-            toastMessage.value = message
-            toastType.value = type
         }
     }
 
@@ -83,7 +60,7 @@ fun TodoDetailsScreen(navController: NavController) {
             TopAppBar(
                 title = { Text(stringResource(R.string.add_todo)) },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = { navigateToTodoScreen() }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back)
@@ -130,11 +107,6 @@ fun TodoDetailsScreen(navController: NavController) {
                     ) {
                         CircularProgressIndicator()
                     }
-                }
-
-                if (toastMessage.value.isNotEmpty()) {
-                    val context = LocalContext.current
-                    Toast.makeText(context, toastMessage.value, Toast.LENGTH_SHORT).show()
                 }
             }
         }
